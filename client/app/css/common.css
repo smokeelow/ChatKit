@@ -1,0 +1,49 @@
+@font-face {
+    font-family: 'SegoeWPRegular';
+    src: url('../fonts/segoewp.eot');
+    src: url('../fonts/segoewp.eot') format('embedded-opentype'), url('../fonts/segoewp.woff') format('woff'), url('../fonts/segoewp.ttf') format('truetype'), url('../fonts/segoewp.svg#SegoeWPRegular') format('svg');
+}
+
+* {
+    padding: 0;
+    margin: 0;
+    -webkit-user-select:none;
+    cursor: default;
+}
+
+body {
+    background: #eaedf1;
+    font: 14px SegoeWPRegular;
+}
+
+.clear{
+    clear: both;
+}
+
+.card {
+    background: #fff;
+    border-radius: 1px;
+    box-sizing: border-box;
+    padding: 20px;
+    color: #adadad;
+}
+
+.blue-btn, .green-btn {
+    color:#fff;
+    border-radius: 1px;
+    text-align: center;
+    padding:5px 10px;
+    font-size:16px;
+}
+
+.blue-btn {
+    background: #55d4eb;
+}
+
+.green-btn {
+    background: #129281;
+}
+
+.green-btn:hover {
+    background: #1fbba6;
+}
