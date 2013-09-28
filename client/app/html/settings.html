@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>ChatKit</title>
+    <meta http-equiv="pragma" content="no-cache">
     <link href="../css/common.css" type="text/css" rel="stylesheet"/>
     <link href="../css/settings.css" type="text/css" rel="stylesheet"/>
     <script src="../js/settings.js" type="text/javascript"></script>
@@ -33,20 +34,18 @@
 
 <!-------- CAMERA LAYER -------->
 <div id="camera-layer" class="animate">
+    <div id="close-clayer">X</div>
     <div id="camera-view">
-        <video id="camera" width="320" height="240" autoplay></video>
+        <video id="camera" width="300" height="300" autoplay></video>
         <button id="make-shot">Take a picture</button>
+
+        <div class="prev-avatar">
+            <canvas id="camera-preview" width="180" height="180"></canvas>
+            <button id="save-shot">Save</button>
+        </div>
     </div>
-    <div id="camera-preview">
-        <ul>
-            <li>
-                <canvas width="320" height="240"></canvas>
-            </li>
-            <li></li>
-            <li></li>
-            <li></li>
-        </ul>
-    </div>
+
+
 </div>
 
 

@@ -1,5 +1,5 @@
-var config = require('../config'),
-    fs = require('fs');
+//Global vars
+var fs = require('fs');
 
 /**
  * App Settings
@@ -7,9 +7,34 @@ var config = require('../config'),
  */
 var Settings = {};
 
+/**
+ * Open camera interface
+ */
+Settings.openCameraLayer = function () {
+    var cameraLayer = document.getElementById('camera-layer');
+
+    cameraLayer.className = 'show-from-scale';
+
+    Settings.getUserCamera();
+
+    document.getElementById('close-clayer').addEventListener('click', function () {
+        cameraLayer.className = '';
+    });
+
+    document.getElementById('make-shot').addEventListener('click', function () {
+        var camera = document.getElementById('camera');
+        var photo = document.getElementById('camera-preview');
+
+        photo.getContext('2d').drawImage(camera, 0, 0, 180, 180);
+    });
+};
+
+/**
+ * Connect to user camera
+ */
 Settings.getUserCamera = function () {
     function success(stream) {
-        document.getElementById('camFeed').src = webkitURL.createObjectURL(stream);
+        document.getElementById('camera').src = webkitURL.createObjectURL(stream);
     }
 
     function fail() {
@@ -23,36 +48,26 @@ Settings.getUserCamera = function () {
 };
 
 
-Settings.takeUserPhoto = function () {
-    var c = document.getElementById('photo');
-    var v = document.getElementById('camFeed');
-    c.getContext('2d').drawImage(v, 0, 0, 320, 240);
-
-    var image = c.toDataURL('image/png').replace('image/png', 'image/octet-stream');
-
-    //
-    ////Save image
-    //var base64Data = req.rawBody.replace(/^data:image\/png;base64,/, ""),
-    //
-    //    require
-    //("fs").writeFile("out.png", base64Data, 'base64', function (err) {
-    //    console.log(err);
-    //});
-};
-
-
+/**
+ * Saving picture that user choose (from camera or from local storage)
+ * @param type
+ * @param data
+ */
 Settings.saveImagePath = function (type, data) {
     if (type == 'camera')
         saveFromCamera();
     else
         saveLocalPath();
 
-
+    //If image from captured from camera
     function saveFromCamera() {
 
     }
 
+
+    //If image selected by user
     function saveLocalPath() {
+        console.log(data.value);
         var type = data.value.split('.'),
             extArr = ['gif', 'png', 'jpg', 'jpeg'];
 
@@ -67,41 +82,27 @@ Settings.saveImagePath = function (type, data) {
                 if (this.width < 180 || this.height < 180)
                     Settings.showPopUp('Minimum size of image must be 180x180');
                 else {
+                    var canvas = document.createElement('canvas');
+                    canvas.width = 180;
+                    canvas.height = 180;
 
-                    fs.readFile(data.value, function (err, image) {
-                        if (err)
-                            console.log(err)
-                        else {
-                            var base64Image = image.toString('base64'),
-                                imgName = base64Image.substr(20, 20);
+                    var image = canvas.getContext('2d').drawImage(tempImg, 0, 0, 180, 180);
 
-                            fs.writeFile('images/user/' + imgName + '.' + type['1'], base64Image, 'base64', function (err) {
-                                if (err)
-                                    console.log(err);
-                                else {
-                                    config['user-image'] = '../images/user/avatar.' + type['1'];
+                    localStorage['user-image'] = canvas.toDataURL();
 
-                                    var tmpConfig = JSON.stringify(config);
-
-                                    fs.writeFile('../config.json', tmpConfig, function (err) {
-                                        if (err)
-                                            console.log(err);
-                                        else
-                                            Settings.init();
-                                    });
-                                }
-                            });
-                        }
-                    });
+                    Settings.init();
                 }
-            };
+            }
 
             tempImg.src = data.value;
         }
     }
 };
 
-
+/**
+ * Shows popup with error message
+ * @param txt
+ */
 Settings.showPopUp = function (txt) {
     var overlay = document.getElementById('overlay'),
         popup = document.getElementById('popup'),
@@ -111,7 +112,7 @@ Settings.showPopUp = function (txt) {
 
     popupTxt.innerHTML = txt;
     var w = popup.clientWidth;
-    var margin = (w / 2).toString();
+    var margin = (w / 2);
     popup.style.marginLeft = '-' + margin + 'px';
     wrapper.className = 'blur-scale';
     popup.className += ' show-from-scale';
@@ -120,6 +121,7 @@ Settings.showPopUp = function (txt) {
         popup.classList.remove('show-from-scale');
         wrapper.className = '';
         popup.classList.add('blur-100');
+
         setTimeout(function () {
             popup.classList.remove('blur-100');
             popupTxt.innerHTML = '';
@@ -127,17 +129,29 @@ Settings.showPopUp = function (txt) {
     });
 };
 
+
+/**
+ * Initialize main settings
+ */
 Settings.init = function () {
-    var userAvatar = document.getElementById('user-avatar'),
+    var file = document.getElementById('file-picture'),
+        userAvatar = document.getElementById('user-avatar'),
         userAvatarImg = userAvatar.getElementsByTagName('img')[0];
 
-    if (config['user-image'] != '')
-        userAvatarImg.src = config['user-image'];
+    file.value = '';
+
+    if (localStorage['user-image'] != null) {
+        userAvatarImg.src = localStorage['user-image'];
+        userAvatar.classList.remove('no-avatar');
+    }
 };
 
 window.addEventListener('DOMContentLoaded', function () {
     Settings.init();
-    console.log(config);
+
+    document.getElementById('open-camera-layer').addEventListener('click', function () {
+        Settings.openCameraLayer();
+    });
 
     var file = document.getElementById('file-picture');
 
