@@ -1,15 +1,8 @@
 * {
     -webkit-transition: all 250ms cubic-bezier(0.215, 0.610, 0.355, 1.000);
-    -moz-transition: all 250ms cubic-bezier(0.215, 0.610, 0.355, 1.000);
-    -ms-transition: all 250ms cubic-bezier(0.215, 0.610, 0.355, 1.000);
-    -o-transition: all 250ms cubic-bezier(0.215, 0.610, 0.355, 1.000);
-    transition: all 250ms cubic-bezier(0.215, 0.610, 0.355, 1.000); /* easeOutCubic */
-
+    transition: all 250ms cubic-bezier(0.215, 0.610, 0.355, 1.000);
     -webkit-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
-    -moz-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
-    -ms-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
-    -o-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
-    transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000); /* easeOutCubic */
+    transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
 }
 
 html, body {
@@ -223,7 +216,7 @@ html, body {
     -webkit-filter: blur(100px);
 }
 
-#next-step, #save-settings{
+#next-step, #save-settings {
     font-size: 25px;
     margin: 13% auto 0;
     padding: 7px;

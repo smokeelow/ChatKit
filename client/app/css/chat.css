@@ -1,17 +1,10 @@
-* {
-    margin: 0;
-    padding: 0;
-    outline: none;
-    -webkit-user-select: none;
-}
-
 html, body {
     height: 100%;
     font-family: Arial, Helvetica, sans-serif;
 }
 
 body {
-    background: url(../images/body.jpg) repeat;
+    background: #fff;
     overflow: hidden;
 }
 
@@ -41,7 +34,6 @@ body {
 }
 
 #users-list {
-    background: url(../images/subnav.jpg) repeat;
     border-right: 1px solid #c3c3c3;
     float: left;
     min-height: 100%;
@@ -170,19 +162,27 @@ body {
 }
 
 .animate-messages, #message-area, #message, .message-line {
-    -webkit-transition: all 150ms cubic-bezier(0.165, 0.840, 0.440, 1.000);
-    transition: all 150ms cubic-bezier(0.165, 0.840, 0.440, 1.000);
-    -webkit-transition-timing-function: cubic-bezier(0.165, 0.840, 0.440, 1.000);
-    transition-timing-function: cubic-bezier(0.165, 0.840, 0.440, 1.000);
+    -webkit-transition: all 200ms cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    transition: all 200ms cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    -webkit-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
 }
 
 .message-line {
-    background: #e2e2e2;
-    border-bottom: 1px solid #f2f2f2;
     box-sizing: border-box;
     position: relative;
-    z-index: 10;
+    padding: 5px 10px;
     width: 100%;
+    z-index: 10;
+}
+
+.message-line .user-msg-box .user-name {
+    color:#0078ca;
+    font-weight: bold;
+}
+
+.message-line.current-user .user-name{
+    color:#999999;
 }
 
 #test-layer .message-line {
@@ -190,10 +190,6 @@ body {
     border-bottom: 1px solid #f2f2f2;
     height: auto;
     min-height: 60px;
-}
-
-.message-line.current-user {
-    background: #FEFEFE;
 }
 
 .message-line .msg-left-side{
@@ -204,13 +200,7 @@ body {
 }
 
 .message-line .user-msg-box .user-icon {
-    background: #fff;
-    border-radius: 50px;
-    box-shadow: 0 0px 2px rgba(0,0,0, .1);
-    height: 45px;
-    width: 45px;
-    text-align: center;
-    overflow:hidden;
+
 }
 
 .message-line .user-msg-box .user-icon img {
@@ -230,7 +220,10 @@ body {
 }
 
 .message-line .user-msg-box .user-msg-date {
-
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    color: #93999d;
 }
 
 .message-line .user-msg-box .user-msg {
@@ -239,4 +232,30 @@ body {
 
 .spacer {
     height: 100%;
+}
+
+#users-list .user {
+    padding: 5px;
+}
+
+#users-list .user:hover {
+    background: #eee;
+}
+
+#users-list .user .user-image {
+    width: 40px;
+    border-radius: 50px;
+    float: left;
+}
+
+#users-list .user .user-nickname {
+    float: left;
+    color:#2a2a2a;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 118px;
+    white-space: nowrap;
+    position: relative;
+    top: 11px;
+    left: 10px;
 }

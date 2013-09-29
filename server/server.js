@@ -2,9 +2,12 @@ var ws = require('ws').Server,
     WebSocketServer = new ws({port: 8080});
 
 console.log('server-started');
-var clients = [];
+var usersList = {'event':'usersList'};
 
 WebSocketServer.on('connection', function (socket) {
+    console.log('user connected');
+    console.log('online: ' + this.clients.length);
+
     //WebSocket Server
     var $server = this;
 
@@ -23,14 +26,22 @@ WebSocketServer.on('connection', function (socket) {
     var sendEvent = {};
 
     /**
-     * Send data to all users
+     * Send some data to all users
      * @param msg
+     * @param key
      */
-    sendEvent.toAll = function (msg) {
-        for (var i in $server.clients)
-            if ($server.clients[i] != socket)
-                $server.clients[i].send(msg);
-    }
+    sendEvent.toAll = function (msg,key) {
+        if(key) {
+            for (var i in $server.clients)
+                    $server.clients[i].send(msg);
+        }
+        else {
+            for (var i in $server.clients)
+                if ($server.clients[i] != socket)
+                    $server.clients[i].send(msg);
+        }
+
+    };
 
     //Connected event
     sendEvent.connectedUser = function () {
@@ -61,24 +72,54 @@ WebSocketServer.on('connection', function (socket) {
     sendEvent.newMessage = {
         init: function (jsonArr) {
             var time = (new Date).toLocaleTimeString(),
-                usrJson = {'event': 'newMessageSent', 'time': time, 'text': jsonArr.text},
+                usrJson = {'event': 'newMessageSent', 'time': time, 'text': jsonArr.text,'nickname':jsonArr['nickname']},
                 clientStr = JSON.stringify(usrJson),
-                allJson = {'event':'newMessageReceived','time':time,'text':jsonArr.text},
+                allJson = {'event': 'newMessageReceived', 'time': time, 'text': jsonArr.text,'nickname':jsonArr['nickname']},
                 allStr = JSON.stringify(allJson);
 
-            //send to user
             socket.send(clientStr);
             sendEvent.toAll(allStr);
         }
     };
 
+    /**
+     * Send notification that user typing something
+     * @type {{init: Function}}
+     */
     sendEvent.userPrint = {
         init: function (jsonArr) {
             var clientStr = JSON.stringify(jsonArr);
 
             sendEvent.toAll(clientStr);
         }
-    }
+    };
+
+    /**
+     * Send to all users current user name and avatar
+     * @type {{init: Function}}
+     */
+    sendEvent.userData = {
+        init: function (json) {
+            usersList[socket['upgradeReq']['headers']['sec-websocket-key']] = {'nickname':json['nickname'],'user-image':json['user-image']};
+
+            var clientStr = JSON.stringify(usersList);
+
+            socket.send(clientStr);
+            sendEvent.toAll(clientStr);
+        }
+    };
+
+
+    /**
+     * Update users list after user disconnect
+     */
+    sendEvent.userDataUpdate = function() {
+        delete usersList[socket['upgradeReq']['headers']['sec-websocket-key']];
+
+        var clientStr = JSON.stringify(usersList);
+
+        sendEvent.toAll(clientStr,'all');
+    };
 
     //Send notification about new user
     sendEvent.connectedUser();
@@ -96,8 +137,16 @@ WebSocketServer.on('connection', function (socket) {
      * Disconnect event
      */
     socket.on('close', function () {
+        //notification
         console.log('user disconnected');
 
-        console.log('online: '+$server.clients.length)
+        //update users list
+        sendEvent.userDataUpdate();
+
+        //show online
+        console.log('online: ' + $server.clients.length)
+
+        //show users list
+        console.log(usersList);
     });
 });

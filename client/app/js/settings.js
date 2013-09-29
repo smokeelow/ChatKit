@@ -140,7 +140,13 @@ Settings.showPopUp = function (txt) {
 /**
  * Initialize main settings
  */
-Settings.init = function () {
+Settings.init = function (callback) {
+
+    if(localStorage['user-image'] != '' && localStorage['nickname'] != '')
+        window.location.href= 'chat.html';
+    else if(callback)
+        callback();
+
     var file = document.getElementById('file-picture'),
         userAvatar = document.getElementById('user-avatar'),
         userAvatarImg = userAvatar.getElementsByTagName('img')[0];
@@ -151,6 +157,7 @@ Settings.init = function () {
         userAvatarImg.src = localStorage['user-image'];
         userAvatar.classList.remove('no-avatar');
     }
+
 };
 
 Settings.steps = {
@@ -188,37 +195,37 @@ Settings.steps = {
 };
 
 window.addEventListener('DOMContentLoaded', function () {
-    Settings.init();
+    Settings.init(function() {
+        Settings.steps.first();
 
-    Settings.steps.first();
+        document.getElementById('open-camera-layer').addEventListener('click', function () {
+            Settings.openCameraLayer();
+        });
 
-    document.getElementById('open-camera-layer').addEventListener('click', function () {
-        Settings.openCameraLayer();
-    });
+        var file = document.getElementById('file-picture');
 
-    var file = document.getElementById('file-picture');
+        file.addEventListener('mouseover', function () {
+            document.getElementById('file-from-fs').style.background = '#1fbba6';
+        });
 
-    file.addEventListener('mouseover', function () {
-        document.getElementById('file-from-fs').style.background = '#1fbba6';
-    });
+        file.addEventListener('mouseout', function () {
+            document.getElementById('file-from-fs').style.background = '';
+        });
 
-    file.addEventListener('mouseout', function () {
-        document.getElementById('file-from-fs').style.background = '';
-    });
+        file.addEventListener('change', function () {
+            Settings.saveImagePath('file', this);
+        });
 
-    file.addEventListener('change', function () {
-        Settings.saveImagePath('file', this);
-    });
+        document.getElementById('next-step').addEventListener('click', function() {
+            var firstStep = document.getElementById('first-step'),
+                secondStep = document.getElementById('second-step');
 
-    document.getElementById('next-step').addEventListener('click', function() {
-        var firstStep = document.getElementById('first-step'),
-            secondStep = document.getElementById('second-step');
+            firstStep.style.display = 'none';
 
-        firstStep.style.display = 'none';
+            secondStep.style.opacity = 1;
+            secondStep.style.left = 0;
 
-        secondStep.style.opacity = 1;
-        secondStep.style.left = 0;
-
-        Settings.steps.second();
+            Settings.steps.second();
+        });
     });
 });

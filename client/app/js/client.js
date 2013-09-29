@@ -1,13 +1,14 @@
 window.addEventListener('DOMContentLoaded', function () {
 
     /*********** SOCKET EVENTS ***********/
-    var socket = new WebSocket('ws://localhost:8080');
+    var socket = new WebSocket('ws://192.168.1.31:8080');
 
     /**
      * Open socket
      */
     socket.addEventListener('open', function () {
         document.getElementById('overlay').style.display = 'none';
+        Message.sendUserInfo();
     });
 
     /**
@@ -15,6 +16,7 @@ window.addEventListener('DOMContentLoaded', function () {
      * @param msg
      */
     socket.addEventListener('message', function (event) {
+        console.log(event.data);
         Message.display(event.data);
     });
     /*********** SOCKET EVENTS END***********/
@@ -116,6 +118,16 @@ window.addEventListener('DOMContentLoaded', function () {
      */
     var Message = {};
 
+    /**
+     * Send to server user info
+     */
+    Message.sendUserInfo = function () {
+        var json = {'event': 'userData', 'user-image': localStorage['user-image'], 'nickname': localStorage['nickname']},
+            serverStr = JSON.stringify(json);
+
+        socket.send(serverStr);
+    };
+
     Message.userStartPrint = function () {
         var json = {'event': 'userPrint', 'type': 1},
             serverStr = JSON.stringify(json);
@@ -138,7 +150,7 @@ window.addEventListener('DOMContentLoaded', function () {
         var txt = e.innerHTML.toString();
 
         if (txt != '') {
-            var json = {'event': 'newMessage', 'text': encodeURI(txt)},
+            var json = {'event': 'newMessage', 'text': encodeURI(txt), 'user-image': localStorage['user-image'], 'nickname': localStorage['nickname']},
                 serverStr = JSON.stringify(json);
             e.innerHTML = '';
             socket.send(serverStr);
@@ -164,19 +176,24 @@ window.addEventListener('DOMContentLoaded', function () {
          * @type {{init: Function}}
          */
         MsgEvents.newMessageSent = {
-            init: function () {
+            /**
+             * if TRUE message is received, else message is sent
+             * @param type
+             */
+            init: function (type) {
+                var h = document.createElement('div');
+
+                if(type)
+                    h.className = 'message-line';
+                else
+                    h.className = 'message-line current-user';
+
+
+                //decode user message
                 var msg = decodeURI(jsonArr.text);
 
-                //Message construct
-                var h = document.createElement('div');
-                h.className = 'message-line current-user';
-
-                if (!msg.icon)
-                    var icon = '<div class="user-icon"><img src="images/no-avatar.png" alt="no-avatar"/></div>';
-                else
-                    var icon = '<div class="user-icon"><img src="' + msg.icon + '" alt="no-avatar"/></div>';
-
-                var msgHtml = '<div class="user-msg-box"><div class="msg-left-side">' + icon + '</div><div class="msg-right-side"><div class="user-name"></div><div class="user-msg-date">' + jsonArr.time + '</div><div class="user-msg">' + msg + '</div></div><div class="clear"></div></div>';
+                //user message construct
+                var msgHtml = '<div class="user-msg-box"><div class="msg-right-side"><div class="user-name">' + jsonArr['nickname'] + '</div><div class="user-msg-date">' + jsonArr.time + '</div><div class="user-msg">' + msg + '</div></div><div class="clear"></div></div>';
                 h.innerHTML = msgHtml;
 
                 TestLayer.appendChild(h);
@@ -184,7 +201,7 @@ window.addEventListener('DOMContentLoaded', function () {
                 var elementHeight = h.clientHeight.toString();
                 TestLayer.removeChild(h);
 
-                h.style.marginBottom = '-'+elementHeight + 'px';
+                h.style.marginBottom = '-' + elementHeight + 'px';
 
                 Log.appendChild(h);
 
@@ -194,8 +211,8 @@ window.addEventListener('DOMContentLoaded', function () {
 
                 checkMsgHeight();
 
-                var counter = 0;
-                var timer = setInterval(function () {
+                var counter = 0,
+                    timer = setInterval(function () {
                     counter++;
 
                     MsgWrapper.scrollTop = MsgWrapper.scrollHeight;
@@ -212,56 +229,13 @@ window.addEventListener('DOMContentLoaded', function () {
          */
         MsgEvents.newMessageReceived = {
             init: function () {
-                var msg = decodeURI(jsonArr.text);
-
-                //Message construct
-                var h = document.createElement('div');
-                h.className = 'message-line';
-
-                if (!msg.icon)
-                    var icon = '<div class="user-icon"><img src="images/no-avatar.png" alt="no-avatar"/></div>';
-                else
-                    var icon = '<div class="user-icon"><img src="' + msg.icon + '" alt="no-avatar"/></div>';
-
-                var msgHtml = '<div class="user-msg-box"><div class="msg-left-side">' + icon + '</div><div class="msg-right-side"><div class="user-name"></div><div class="user-msg-date">' + jsonArr.time + '</div><div class="user-msg">' + msg + '</div></div><div class="clear"></div></div>';
-                h.innerHTML = msgHtml;
-
-                TestLayer.appendChild(h);
-
-                var elementHeight = h.clientHeight.toString();
-                TestLayer.removeChild(h);
-
-                h.style.top = elementHeight + 'px';
-                Log.appendChild(h);
-
-                setTimeout(function () {
-                    h.style.top = 0;
-                    h.style.padding = '5px';
-                    h.style.height = elementHeight + 'px';
-                }, 1);
-
-                checkMsgHeight();
-
-                var counter = 0;
-                var timer = setInterval(function () {
-                    counter++;
-
-                    MsgWrapper.scrollTop = MsgWrapper.scrollHeight;
-
-                    if (counter == 150)
-                        clearInterval(timer);
-                }, 1);
+                MsgEvents.newMessageSent.init(true);
             }
         };
 
         MsgEvents.userPrint = {
             init: function () {
-                //                var print = document.createElement('div');
-
                 if (jsonArr.type) {
-                    //                    print.setAttribute('id', 'typing');
-                    //                    print.innerHTML = 'Typing';
-
                     console.log('typing');
                 }
                 else
@@ -289,6 +263,25 @@ window.addEventListener('DOMContentLoaded', function () {
             }
         };
 
+        /**
+         * Generate users list
+         * @type {{init: Function}}
+         */
+        MsgEvents.usersList = {
+            init: function () {
+                //remove first element for users list
+                delete jsonArr['event'];
+
+                UsersList.innerHTML = '';
+
+                for (var id in jsonArr) {
+                    var userHtml = '<div class="user" data-id="' + id + '"><img class="user-image" src="' + jsonArr[id]['user-image'] + '"/><div class="user-nickname">' + jsonArr[id]['nickname'] + '</div><div class="clear"></div>';
+
+                    UsersList.innerHTML += userHtml;
+                }
+            }
+        };
+
         //Call event
         MsgEvents[jsonArr.event].init();
     };
@@ -302,16 +295,6 @@ window.addEventListener('DOMContentLoaded', function () {
         if (e.which == '13')
             Message.prepareAndSend(this);
     });
-
-    //    //Track typing
-    //    MsgBox.addEventListener('keydown', function () {
-    //        Message.userStartPrint();
-    //    });
-    //
-    //    //Track typing
-    //    MsgBox.addEventListener('keyup', function () {
-    //        Message.userStopPrint();
-    //    })
 
     //Track Button press
     SendBtn.addEventListener('click', function () {
