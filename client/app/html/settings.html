@@ -10,11 +10,11 @@
 <body>
 <div id="wrapper">
     <div id="first-step">
-        <div id="step-title">Choose your picture</div>
+        <div class="step-title">Choose your picture</div>
         <div id="profile" class="card">
             <div id="user-picture">
                 <div class="picture">
-                    <div id="user-avatar" class="no-avatar">
+                    <div id="user-avatar">
                         <img src="../images/no-avatar.png"/>
                     </div>
 
@@ -28,6 +28,19 @@
                 </div>
             </div>
         </div>
+
+        <div id="next-step" class="blue-btn">Next</div>
+    </div>
+
+    <div id="second-step">
+        <div class="step-title">Choose your name</div>
+        <input id="nickname" name="nickname" placeholder="Enter your nickname" maxlength="15" type="text"/>
+        <div class="pre-box">
+            <div class="title">Will be saved:</div>
+            <div id="pre-saved-name"></div>
+        </div>
+
+        <div id="save-settings" class="blue-btn">Save</div>
     </div>
 </div>
 
@@ -41,11 +54,9 @@
 
         <div class="prev-avatar">
             <canvas id="camera-preview" width="180" height="180"></canvas>
-            <button id="save-shot">Save</button>
         </div>
+        <button id="save-shot">Save</button>
     </div>
-
-
 </div>
 
 

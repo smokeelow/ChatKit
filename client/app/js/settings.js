@@ -11,7 +11,9 @@ var Settings = {};
  * Open camera interface
  */
 Settings.openCameraLayer = function () {
-    var cameraLayer = document.getElementById('camera-layer');
+    var cameraLayer = document.getElementById('camera-layer'),
+        camera = document.getElementById('camera'),
+        photo = document.getElementById('camera-preview');
 
     cameraLayer.className = 'show-from-scale';
 
@@ -22,10 +24,11 @@ Settings.openCameraLayer = function () {
     });
 
     document.getElementById('make-shot').addEventListener('click', function () {
-        var camera = document.getElementById('camera');
-        var photo = document.getElementById('camera-preview');
-
         photo.getContext('2d').drawImage(camera, 0, 0, 180, 180);
+    });
+
+    document.getElementById('save-shot').addEventListener('click', function() {
+        Settings.saveImagePath('camera', photo)
     });
 };
 
@@ -61,7 +64,11 @@ Settings.saveImagePath = function (type, data) {
 
     //If image from captured from camera
     function saveFromCamera() {
+        localStorage['user-image'] = data.toDataURL();
 
+        document.getElementById('camera-layer').className = '';
+
+        Settings.init();
     }
 
 
@@ -146,8 +153,44 @@ Settings.init = function () {
     }
 };
 
+Settings.steps = {
+    first: function () {
+        var content = document.getElementById('profile');
+
+        document.title = 'ChatKit / Choose your picture';
+
+        content.style.top = 0;
+        content.style.opacity = 1;
+    },
+
+    second: function() {
+        document.title = 'ChatKit / Choose your name';
+
+        var nickName = document.getElementById('nickname'),
+            tmpElement = document.createElement('div'),
+            preSave = document.getElementById('pre-saved-name'),
+            saveSettings = document.getElementById('save-settings');
+
+        nickName.addEventListener('keyup', function() {
+            tmpElement.innerHTML = this.value;
+            preSave.innerHTML = tmpElement.textContent || tmpElement.innerText;
+
+            localStorage['nickname'] = tmpElement.textContent || tmpElement.innerText;
+            console.log(localStorage['nickname']);
+        });
+
+
+        saveSettings.addEventListener('click', function() {
+            if(localStorage['nickname'] != '')
+                window.location.href = 'chat.html';
+        });
+    }
+};
+
 window.addEventListener('DOMContentLoaded', function () {
     Settings.init();
+
+    Settings.steps.first();
 
     document.getElementById('open-camera-layer').addEventListener('click', function () {
         Settings.openCameraLayer();
@@ -165,5 +208,17 @@ window.addEventListener('DOMContentLoaded', function () {
 
     file.addEventListener('change', function () {
         Settings.saveImagePath('file', this);
+    });
+
+    document.getElementById('next-step').addEventListener('click', function() {
+        var firstStep = document.getElementById('first-step'),
+            secondStep = document.getElementById('second-step');
+
+        firstStep.style.display = 'none';
+
+        secondStep.style.opacity = 1;
+        secondStep.style.left = 0;
+
+        Settings.steps.second();
     });
 });
