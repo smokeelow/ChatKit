@@ -1,14 +1,18 @@
 @font-face {
-    font-family: 'SegoeWPRegular';
-    src: url('../fonts/segoewp.eot');
-    src: url('../fonts/segoewp.eot') format('embedded-opentype'), url('../fonts/segoewp.woff') format('woff'), url('../fonts/segoewp.ttf') format('truetype'), url('../fonts/segoewp.svg#SegoeWPRegular') format('svg');
+    font-family: 'MyriadProRegular';
+    src: url('../fonts/myriadpro-regular.eot');
+    src: url('../fonts/myriadpro-regular.eot') format('embedded-opentype'),
+    url('../fonts/myriadpro-regular.woff') format('woff'),
+    url('../fonts/myriadpro-regular.ttf') format('truetype'),
+    url('../fonts/myriadpro-regular.svg#MyriadProRegular') format('svg');
 }
+
 
 * {
     padding: 0;
     margin: 0;
     outline: none;
-    -webkit-user-select:none;
+    -webkit-user-select: none;
     cursor: default;
 }
 
@@ -21,7 +25,7 @@ body {
     font: 14px SegoeWPRegular;
 }
 
-.clear{
+.clear {
     clear: both;
 }
 
@@ -34,11 +38,11 @@ body {
 }
 
 .blue-btn, .green-btn {
-    color:#fff;
+    color: #fff;
     border-radius: 1px;
     text-align: center;
-    padding:5px 10px;
-    font-size:16px;
+    padding: 5px 10px;
+    font-size: 16px;
 }
 
 .blue-btn {

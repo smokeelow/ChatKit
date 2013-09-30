@@ -1,7 +1,7 @@
 window.addEventListener('DOMContentLoaded', function () {
 
     /*********** SOCKET EVENTS ***********/
-    var socket = new WebSocket('ws://192.168.1.31:8080');
+    var socket = new WebSocket('ws://localhost:8080');
 
     /**
      * Open socket
@@ -16,7 +16,6 @@ window.addEventListener('DOMContentLoaded', function () {
      * @param msg
      */
     socket.addEventListener('message', function (event) {
-        console.log(event.data);
         Message.display(event.data);
     });
     /*********** SOCKET EVENTS END***********/
@@ -162,7 +161,6 @@ window.addEventListener('DOMContentLoaded', function () {
      * @param jsonObj
      */
     Message.display = function (jsonObj) {
-        console.log(jsonObj);
         var jsonArr = JSON.parse(jsonObj);
 
         /**
@@ -183,11 +181,10 @@ window.addEventListener('DOMContentLoaded', function () {
             init: function (type) {
                 var h = document.createElement('div');
 
-                if(type)
+                if (type)
                     h.className = 'message-line';
                 else
                     h.className = 'message-line current-user';
-
 
                 //decode user message
                 var msg = decodeURI(jsonArr.text);
@@ -203,23 +200,29 @@ window.addEventListener('DOMContentLoaded', function () {
 
                 h.style.marginBottom = '-' + elementHeight + 'px';
 
+                console.log(h.style.marginBottom);
+
                 Log.appendChild(h);
 
                 setTimeout(function () {
+//                    h.className += ' animate-messages';
                     h.style.marginBottom = 0;
                 }, 1);
 
-                checkMsgHeight();
 
+//                var worker = new Worker(window.URL.createObjectURL(new Blob([])));
+//
+//                worker.postMessage();
+                checkMsgHeight()
                 var counter = 0,
                     timer = setInterval(function () {
-                    counter++;
+                        counter++;
 
-                    MsgWrapper.scrollTop = MsgWrapper.scrollHeight;
+                        MsgWrapper.scrollTop = MsgWrapper.scrollHeight;
 
-                    if (counter == 150)
-                        clearInterval(timer);
-                }, 1);
+                        if (counter == 150)
+                            clearInterval(timer);
+                    }, 1);
             }
         };
 

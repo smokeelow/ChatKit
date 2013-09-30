@@ -1,11 +1,43 @@
 html, body {
     height: 100%;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: Helvetica, Arial sans-serif;
 }
 
 body {
-    background: #fff;
+    background: #2b2938;
     overflow: hidden;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-button {
+    display: none;
+}
+
+::-webkit-scrollbar-track {
+    background: #2b2938;
+    box-shadow: none;
+}
+
+::-webkit-scrollbar-track-piece {
+}
+
+::-webkit-scrollbar-thumb {
+    background: #999fb9;
+    border-radius: 20px;
+    border: 1px solid #2b2938;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #bcc1d8;
+}
+
+::-webkit-scrollbar-corner {
+}
+
+::-webkit-resizer {
 }
 
 .clear {
@@ -13,10 +45,10 @@ body {
 }
 
 #test-layer {
-    position:  absolute;
+    position: absolute;
     left: -9999px;
     height: 100%;
-    width:2000px;
+    width: 2000px;
 }
 
 #overlay {
@@ -34,12 +66,14 @@ body {
 }
 
 #users-list {
-    border-right: 1px solid #c3c3c3;
+    border-right: 1px solid rgba(255, 255, 255, 0.04);
     float: left;
     min-height: 100%;
     height: 100%;
     position: relative;
     z-index: 100;
+    background: #3f3b5a;
+    box-shadow: 1px 0 2px rgba(0, 0, 0, 0.13);
 }
 
 #message-box {
@@ -60,14 +94,14 @@ body {
 
 #msg-wrapper {
     position: absolute;
-    bottom:0;
+    bottom: 0;
     overflow-y: auto;
-    width:100%;
+    width: 100%;
 }
 
-#log{
+#log {
     position: relative;
-    overflow:hidden;
+    overflow: hidden;
 }
 
 #msg-splitter {
@@ -106,7 +140,7 @@ body {
     box-sizing: border-box;
     font-size: 12px;
     color: #858585;
-    padding:5px;
+    padding: 5px;
     box-shadow: 0 1px 0 #fff;
     border: 1px solid #d7d7d7;
     background: #fdfdfd;
@@ -161,14 +195,14 @@ body {
     box-shadow: 0 0 2px #808080 inset, 0 1px 0 #fff;
 }
 
-.animate-messages, #message-area, #message, .message-line {
-    -webkit-transition: all 200ms cubic-bezier(0.215, 0.610, 0.355, 1.000);
-    transition: all 200ms cubic-bezier(0.215, 0.610, 0.355, 1.000);
+.animate-messages, #message-area, #message, .message-line{
+    -webkit-transition: all 250ms cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    transition: all 250ms cubic-bezier(0.215, 0.610, 0.355, 1.000);
     -webkit-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
     transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
 }
 
-.message-line {
+.message-line, #test-layer .message-line{
     box-sizing: border-box;
     position: relative;
     padding: 5px 10px;
@@ -177,26 +211,20 @@ body {
 }
 
 .message-line .user-msg-box .user-name {
-    color:#0078ca;
+    color: #fff;
     font-weight: bold;
 }
 
-.message-line.current-user .user-name{
-    color:#999999;
+.message-line.current-user .user-name {
+    color: #908da3;
 }
 
-#test-layer .message-line {
-    box-sizing: border-box;
-    border-bottom: 1px solid #f2f2f2;
-    height: auto;
-    min-height: 60px;
-}
 
-.message-line .msg-left-side{
-    float:left;
+.message-line .msg-left-side {
+    float: left;
     padding: 5px;
     height: 100%;
-    width:45px;
+    width: 45px;
 }
 
 .message-line .user-msg-box .user-icon {
@@ -204,14 +232,14 @@ body {
 }
 
 .message-line .user-msg-box .user-icon img {
-    width:50px;
+    width: 50px;
     height: 50px;
     position: relative;
     right: 3px;
 }
 
 .message-line .msg-right-side {
-    float:left;
+    float: left;
     height: 100%;
 }
 
@@ -227,7 +255,7 @@ body {
 }
 
 .message-line .user-msg-box .user-msg {
-
+    color:#ffe8a1;
 }
 
 .spacer {
@@ -250,7 +278,7 @@ body {
 
 #users-list .user .user-nickname {
     float: left;
-    color:#2a2a2a;
+    color: #2a2a2a;
     text-overflow: ellipsis;
     overflow: hidden;
     width: 118px;
