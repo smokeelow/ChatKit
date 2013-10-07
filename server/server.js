@@ -2,14 +2,17 @@ var ws = require('ws').Server,
     WebSocketServer = new ws({port: 8080});
 
 console.log('server-started');
-var usersList = {'event':'usersList'};
+var UsersList = {'event': 'usersList', 'list': {}};
 
-WebSocketServer.on('connection', function (socket) {
+WebSocketServer.on('connection', function (Socket) {
     console.log('user connected');
     console.log('online: ' + this.clients.length);
 
     //WebSocket Server
-    var $server = this;
+    var $Server = this;
+
+    //User WebSocket ID
+    var USER_ID = Socket['upgradeReq']['headers']['sec-websocket-key'];
 
     /**
      * Client events
@@ -23,28 +26,25 @@ WebSocketServer.on('connection', function (socket) {
      *
      * @type object
      */
-    var sendEvent = {};
+    var SendEvent = {};
 
     /**
      * Send some data to all users
      * @param msg
      * @param key
      */
-    sendEvent.toAll = function (msg,key) {
-        if(key) {
-            for (var i in $server.clients)
-                    $server.clients[i].send(msg);
-        }
-        else {
-            for (var i in $server.clients)
-                if ($server.clients[i] != socket)
-                    $server.clients[i].send(msg);
-        }
-
+    SendEvent.toAll = function (msg, key) {
+        if (key)
+            for (var i in $Server.clients)
+                $Server.clients[i].send(msg);
+        else
+            for (var i in $Server.clients)
+                if ($Server.clients[i] != Socket)
+                    $Server.clients[i].send(msg);
     };
 
     //Connected event
-    sendEvent.connectedUser = function () {
+    SendEvent.connectedUser = function () {
         var time = (new Date).toLocaleTimeString(),
             usrMsg = 'You are successfully connected',
             msgAll = 'New user connected',
@@ -53,8 +53,8 @@ WebSocketServer.on('connection', function (socket) {
             clientStr = JSON.stringify(userJson),
             allStr = JSON.stringify(allJson);
 
-        socket.send(clientStr);
-        sendEvent.toAll(allStr);
+        Socket.send(clientStr);
+        SendEvent.toAll(allStr);
     };
 
     /**
@@ -69,16 +69,16 @@ WebSocketServer.on('connection', function (socket) {
      *  };
      * @param msg
      */
-    sendEvent.newMessage = {
+    SendEvent.newMessage = {
         init: function (jsonArr) {
             var time = (new Date).toLocaleTimeString(),
-                usrJson = {'event': 'newMessageSent', 'time': time, 'text': jsonArr.text,'nickname':jsonArr['nickname']},
-                clientStr = JSON.stringify(usrJson),
-                allJson = {'event': 'newMessageReceived', 'time': time, 'text': jsonArr.text,'nickname':jsonArr['nickname']},
+                userJson = {'event': 'newMessageSent', 'time': time, 'text': jsonArr.text, 'nickname': jsonArr['nickname']},
+                clientStr = JSON.stringify(userJson),
+                allJson = {'event': 'newMessageReceived', 'time': time, 'text': jsonArr.text, 'nickname': jsonArr['nickname']},
                 allStr = JSON.stringify(allJson);
 
-            socket.send(clientStr);
-            sendEvent.toAll(allStr);
+            Socket.send(clientStr);
+            SendEvent.toAll(allStr);
         }
     };
 
@@ -86,11 +86,11 @@ WebSocketServer.on('connection', function (socket) {
      * Send notification that user typing something
      * @type {{init: Function}}
      */
-    sendEvent.userPrint = {
+    SendEvent.userPrint = {
         init: function (jsonArr) {
             var clientStr = JSON.stringify(jsonArr);
 
-            sendEvent.toAll(clientStr);
+            SendEvent.toAll(clientStr);
         }
     };
 
@@ -98,14 +98,9 @@ WebSocketServer.on('connection', function (socket) {
      * Send to all users current user name and avatar
      * @type {{init: Function}}
      */
-    sendEvent.userData = {
+    SendEvent.userData = {
         init: function (json) {
-            usersList[socket['upgradeReq']['headers']['sec-websocket-key']] = {'nickname':json['nickname'],'user-image':json['user-image']};
-
-            var clientStr = JSON.stringify(usersList);
-
-            socket.send(clientStr);
-            sendEvent.toAll(clientStr);
+            UsersList['list'][Socket['upgradeReq']['headers']['sec-websocket-key']] = {'nickname': json['nickname'], 'user-image': json['user-image'], 'socket': Socket};
         }
     };
 
@@ -113,40 +108,81 @@ WebSocketServer.on('connection', function (socket) {
     /**
      * Update users list after user disconnect
      */
-    sendEvent.userDataUpdate = function() {
-        delete usersList[socket['upgradeReq']['headers']['sec-websocket-key']];
+    SendEvent.userDataUpdate = function () {
+        delete UsersList['list'][USER_ID];
 
-        var clientStr = JSON.stringify(usersList);
+        console.log(UsersList['list']);
 
-        sendEvent.toAll(clientStr,'all');
+//        var clientStr = JSON.stringify(UsersList);
+
+//        SendEvent.toAll(clientStr, 'all');
+    };
+
+    /**
+     * Search users
+     * @type {{init: Function}}
+     */
+    SendEvent.usersSearch = {
+        init: function (json) {
+            var users = {};
+
+            for (var x in UsersList['list']) {
+                var obj = UsersList['list'][x];
+
+                if (obj['nickname'].toLowerCase().indexOf(json['name'].toLowerCase()) > -1 && x != Socket['upgradeReq']['headers']['sec-websocket-key'])
+                    users[x] = {'nickname': obj['nickname'], 'user-image': obj['user-image']};
+            }
+
+            var json = {'event': 'usersFound', 'data': users},
+                clientStr = JSON.stringify(json);
+
+            Socket.send(clientStr);
+        }
+    };
+
+    /**
+     * Invite user and start chat with him
+     * @type {{init: Function}}
+     */
+    SendEvent.inviteUser = {
+        init: function (json) {
+            var user = UsersList['list'][json['id']]['socket'],
+                userJson = {'event': 'startChat', 'user': {'id': USER_ID, 'nickname': UsersList['list'][USER_ID]['nickname'], 'user-image': UsersList['list'][USER_ID]['user-image']}},
+                userStr = JSON.stringify(userJson),
+                clientJson = {'event': 'startChat', 'user': {'id': json['id'], 'nickname': UsersList['list'][json['id']]['nickname'], 'user-image': UsersList['list'][json['id']]['user-image']}},
+                clientStr = JSON.stringify(clientJson);
+
+            user.send(userStr);
+            Socket.send(clientStr);
+        }
     };
 
     //Send notification about new user
-    sendEvent.connectedUser();
+    SendEvent.connectedUser();
 
     /**
      * Receiving message event
      */
-    socket.on('message', function (msg) {
+    Socket.on('message', function (msg) {
         var jsonArr = JSON.parse(msg);
 
-        sendEvent[jsonArr.event].init(jsonArr);
+        SendEvent[jsonArr.event].init(jsonArr);
     });
 
     /**
-     * Disconnect event
+     * Disconnect user
      */
-    socket.on('close', function () {
+    Socket.on('close', function () {
         //notification
         console.log('user disconnected');
 
         //update users list
-        sendEvent.userDataUpdate();
+        SendEvent.userDataUpdate();
 
         //show online
-        console.log('online: ' + $server.clients.length)
+        console.log('online: ' + $Server.clients.length)
 
         //show users list
-        console.log(usersList);
+        console.log(UsersList);
     });
 });

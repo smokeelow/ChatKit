@@ -4,21 +4,43 @@
     <meta charset="utf-8">
     <link href="../css/common.css" type="text/css" rel="stylesheet">
     <link href="../css/chat.css" type="text/css" rel="stylesheet">
+
+    <script src="../js/ajax.js" type="text/javascript"></script>
     <script src="../js/client.js" type="text/javascript"></script>
     <title>ChatKit</title>
 </head>
 <body>
-    <div id="wrapper">
+<div id="wrapper">
+    <div id="users-list">
         <div id="header">
             <div id="user">
+                <img id="user-image" src=""/>
+                <span id="unread-messages"></span>
+                <span id="user-name"></span>
+            </div>
+            <div id="search">
+                <input id="users-search" placeholder="Search" name="search-users" type="text"/>
+            </div>
+        </div>
+
+        <div id="users">
+
+        </div>
+    </div>
+
+    <!------- MESSAGE BOX ------->
+    <div id="message-box">
+        <!--- SEARCH --->
+        <div id="users-found">
+            <div class="title"></div>
+            <div id="users-search-result">
 
             </div>
-
         </div>
-        <div id="users-list">
+        <!--- SEARCH END --->
 
-        </div>
-        <div id="message-box">
+        <!--- CHAT --->
+        <div id="chat">
             <div id="message-log">
                 <div id="msg-wrapper">
                     <div id="log">
@@ -27,7 +49,11 @@
                 </div>
             </div>
             <div id="msg-splitter">
-                <span></span>
+                <div class="squares">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
             </div>
             <div id="message-area">
                 <div id="message" contenteditable="true">
@@ -38,9 +64,13 @@
                 </div>
             </div>
         </div>
-        <div class="clear"></div>
+        <!--- CHAT END --->
     </div>
-    <div id="test-layer"></div>
-    <div id="overlay"></div>
+    <!------- MESSAGE BOX END ------->
+
+    <div class="clear"></div>
+</div>
+<div id="test-layer"></div>
+<div id="overlay"></div>
 </body>
 </html>

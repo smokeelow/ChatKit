@@ -1,29 +1,12 @@
+/*********** CONFIG ***********/
+//Server IP Address and Port
+var host = 'localhost:8080';
+
+
+//CHAT INIT
 window.addEventListener('DOMContentLoaded', function () {
 
-    /*********** SOCKET EVENTS ***********/
-    var socket = new WebSocket('ws://localhost:8080');
-
-    /**
-     * Open socket
-     */
-    socket.addEventListener('open', function () {
-        document.getElementById('overlay').style.display = 'none';
-        Message.sendUserInfo();
-    });
-
-    /**
-     * Wait message from server
-     * @param msg
-     */
-    socket.addEventListener('message', function (event) {
-        Message.display(event.data);
-    });
-    /*********** SOCKET EVENTS END***********/
-
-
-    /*********** INTERFACE EVENTS ***********/
-
-    //Main Global Elements
+    /*********** GLOBAL ELEMENTS ***********/
     var UsersList = document.getElementById('users-list'),
         MsgBox = document.getElementById('message-box'),
         MsgArea = document.getElementById('message-area'),
@@ -32,11 +15,55 @@ window.addEventListener('DOMContentLoaded', function () {
         Log = document.getElementById('log'),
         MsgSplitter = document.getElementById('msg-splitter'),
         MsgTxt = document.getElementById('message'),
-        TestLayer = document.getElementById('test-layer');
+        TestLayer = document.getElementById('test-layer'),
+        UserImage = document.getElementById('user-image'),
+        UnreadMessages = document.getElementById('unread-messages'),
+        UserName = document.getElementById('user-name'),
+        UsersSearch = document.getElementById('users-search'),
+        UsersFound = document.getElementById('users-found'),
+        Users = document.getElementById('users');
 
-    var msgAreaStartHeight = MsgArea.clientHeight.toString(),
-        msgLogStartHeight = MsgLog.clientHeight.toString();
 
+    /*********** USER PANEL ***********/
+    UserName.innerHTML = localStorage['nickname'];
+    UserImage.src = localStorage['user-image'];
+
+
+    /*********** SOCKET EVENTS ***********/
+    var Socket;
+
+    function ConnectToServer() {
+        Socket = new WebSocket('ws://' + host);
+
+        //Connected to server
+        Socket.addEventListener('open', function () {
+            document.getElementById('overlay').style.display = 'none';
+            Message.sendUserInfo();
+        });
+
+        /**
+         * Wait message from server
+         * @param msg
+         */
+        Socket.addEventListener('message', function (event) {
+            Message.display(event.data);
+        });
+
+        /**
+         * Disconnect from server
+         */
+        Socket.addEventListener('close', function () {
+            ConnectToServer();
+        });
+    }
+
+    //Connect to server on load
+    ConnectToServer();
+
+    /*********** SOCKET EVENTS END***********/
+
+
+    /*********** INTERFACE EVENTS ***********/
     var UsrListWidth = 178;
     UsersList.style.width = UsrListWidth + 'px';
 
@@ -50,7 +77,7 @@ window.addEventListener('DOMContentLoaded', function () {
     //Set height for #message-log
     function setMsgLogHeight() {
         var msgBoxHeight = MsgBox.clientHeight,
-            msgAreaHeight = MsgArea.clientHeight;
+            msgAreaHeight = 215;
 
         var areaHeight = (msgBoxHeight - msgAreaHeight - 17).toString();
 
@@ -68,8 +95,6 @@ window.addEventListener('DOMContentLoaded', function () {
 
                 MsgLog.style.height = (MsgLog.clientHeight + (end - start)) + 'px';
                 MsgArea.style.height = (MsgArea.clientHeight - (end - start)) + 'px';
-
-                var sum = MsgLog.clientHeight + MsgArea.clientHeight + 13;
 
                 if (MsgLog.clientHeight <= 400)
                     removeEvents();
@@ -108,6 +133,48 @@ window.addEventListener('DOMContentLoaded', function () {
         checkMsgHeight();
     });
 
+    /**
+     * Shows right panel
+     * @param name
+     */
+    function showRightPanel(name) {
+        //ID of blocks
+        var arr = ['chat', 'users-found'];
+
+        if (name) {
+            for (var i = 0, size = arr.length; i < size; i++) {
+                if (arr[i] != name)
+                    document.getElementById(arr[i]).style.display = 'none';
+                else
+                    document.getElementById(name).style.display = 'block';
+            }
+        } else {
+            for (var i = 0, size = arr.length; i < size; i++) {
+                document.getElementById(arr[i]).style.display = 'none';
+            }
+        }
+
+    }
+
+    /**
+     * Search users
+     */
+    UsersSearch.addEventListener('keyup', function () {
+        if (this.value != '') {
+            showRightPanel('users-found');
+
+            this.className += ' users-search-active';
+
+            UsersFound.getElementsByClassName('title')[0].innerHTML = 'Users <span>results for "' + this.value + '"</span>';
+
+            var json = {'event': 'usersSearch', 'name': this.value},
+                serverStr = JSON.stringify(json);
+
+            Socket.send(serverStr);
+        } else {
+            showRightPanel();
+        }
+    });
 
     /*********** MESSAGE AREA EVENTS **************/
 
@@ -124,21 +191,21 @@ window.addEventListener('DOMContentLoaded', function () {
         var json = {'event': 'userData', 'user-image': localStorage['user-image'], 'nickname': localStorage['nickname']},
             serverStr = JSON.stringify(json);
 
-        socket.send(serverStr);
+        Socket.send(serverStr);
     };
 
     Message.userStartPrint = function () {
         var json = {'event': 'userPrint', 'type': 1},
             serverStr = JSON.stringify(json);
 
-        socket.send(serverStr);
+        Socket.send(serverStr);
     };
 
     Message.userStopPrint = function () {
         var json = {'event': 'userPrint', 'type': 0},
             serverStr = JSON.stringify(json);
 
-        socket.send(serverStr);
+        Socket.send(serverStr);
     };
 
     /**
@@ -146,18 +213,32 @@ window.addEventListener('DOMContentLoaded', function () {
      * @param e
      */
     Message.prepareAndSend = function (e) {
-        var txt = e.innerHTML.toString();
+        var txt = e.innerHTML;
 
         if (txt != '') {
             var json = {'event': 'newMessage', 'text': encodeURI(txt), 'user-image': localStorage['user-image'], 'nickname': localStorage['nickname']},
                 serverStr = JSON.stringify(json);
             e.innerHTML = '';
-            socket.send(serverStr);
+
+            Socket.send(serverStr);
         }
     };
 
     /**
-     * Display message on screen
+     * Start chat with user
+     * @param id
+     */
+    Message.inviteUser = function (id) {
+        var json = {'event': 'inviteUser', 'id': id},
+            serverStr = JSON.stringify(json);
+
+        document.body.className = 'progress';
+
+        Socket.send(serverStr);
+    };
+
+    /**
+     * Catch event and display
      * @param jsonObj
      */
     Message.display = function (jsonObj) {
@@ -200,19 +281,12 @@ window.addEventListener('DOMContentLoaded', function () {
 
                 h.style.marginBottom = '-' + elementHeight + 'px';
 
-                console.log(h.style.marginBottom);
-
                 Log.appendChild(h);
 
                 setTimeout(function () {
-//                    h.className += ' animate-messages';
                     h.style.marginBottom = 0;
                 }, 1);
 
-
-//                var worker = new Worker(window.URL.createObjectURL(new Blob([])));
-//
-//                worker.postMessage();
                 checkMsgHeight()
                 var counter = 0,
                     timer = setInterval(function () {
@@ -282,6 +356,60 @@ window.addEventListener('DOMContentLoaded', function () {
 
                     UsersList.innerHTML += userHtml;
                 }
+            }
+        };
+
+
+        /**
+         * Show found users
+         * @type {{init: Function}}
+         */
+        MsgEvents.usersFound = {
+            init: function () {
+                var results = document.getElementById('users-search-result');
+
+                results.innerHTML = '';
+
+                for (var id in jsonArr['data']) {
+                    var obj = jsonArr['data'][id],
+                        userLine = document.createElement('div'),
+                        img = '<img src="' + obj['user-image'] + '"/>',
+                        name = '<div class="user-name">' + obj['nickname'] + '</div>',
+                        clear = '<div class="clear"></div>';
+
+                    userLine.className = 'user';
+                    userLine.setAttribute('data-id', id);
+                    userLine.innerHTML = img + name + clear;
+
+                    results.appendChild(userLine);
+
+                    userLine.addEventListener('click', function () {
+                        Message.inviteUser(this.getAttribute('data-id'));
+                    });
+                }
+
+                UsersSearch.className = '';
+            }
+        };
+
+        /**
+         * Start chat with user
+         * @type {{init: Function}}
+         */
+        MsgEvents.startChat = {
+            init: function () {
+                var img = '<img src="' + jsonArr['user']['user-image'] + '"/>',
+                    name = '<div class="user-name">' + jsonArr['user']['nickname'] + '</div>',
+                    clear = '<div class="clear"></div>',
+                    userLine = document.createElement('div');
+
+                userLine.className = 'user';
+                userLine.setAttribute('data-id', jsonArr['user']['id']);
+                userLine.innerHTML = img + name + clear;
+
+                Users.appendChild(userLine);
+
+                showRightPanel('chat');
             }
         };
 

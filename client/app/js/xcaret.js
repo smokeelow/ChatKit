@@ -4,7 +4,7 @@
  * @type object
  */
 var Caret = {}; // <--- THIS IS INITIALIZATION OF OBJECT, IT'S CLEAR?
-
+// OK, I hope that you understood that the above is object
 
 /**
  * Create custom caret
@@ -28,6 +28,11 @@ Caret.setFor = function (elementID) {
     eCaret
         .setAttribute('id', elementID + '-x-caret');
 
+    e.setAttribute('style', 'position:absolute;left:-9999px;');
+
+    eCaret.className = 'x-caret';
+
+
     /*** PLACEMENT OF ELEMENTS ***/
     e.parentNode.insertBefore(eWrapper);
     eWrapper.appendChild(e);
@@ -36,7 +41,7 @@ Caret.setFor = function (elementID) {
     eWrapper.appendChild(eOverlay);
 
     /*** EVENTS ***/
-    eWrapper.addEventListener('click', function () {
+    eOverlay.addEventListener('click', function () {
         e.focus();
     });
 
@@ -44,16 +49,16 @@ Caret.setFor = function (elementID) {
         getAndWrite(this, e);
     });
 
-    e.addEventListener('keyup', function(e) {
+    e.addEventListener('keyup', function (e) {
         getAndWrite(this, e);
     });
 
-    e.addEventListener('keypress', function(e) {
+    e.addEventListener('keypress', function (e) {
         getAndWrite(this, e);
     });
 
     function getAndWrite(el, e) {
-        eWrapper.innerHTML = el.value.replace(/\n/g, '<br/>');
+        eText.innerHTML = el.value.replace(/\n/g, '<br/>');
 
         var length = el.value.length,
             eCaretLeft = parseInt(eCaret.style.left);
@@ -63,4 +68,4 @@ Caret.setFor = function (elementID) {
         else if (e.keyCode == 39 && (eCaretLeft + 10) <= 0)
             eCaret.style.left = eCaretLeft + 10 + 'px';
     }
-};
+}

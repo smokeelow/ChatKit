@@ -142,7 +142,7 @@ Settings.showPopUp = function (txt) {
  */
 Settings.init = function (callback) {
 
-    if(localStorage['user-image'] != '' && localStorage['nickname'] != '')
+    if(localStorage['user-image'] != null && localStorage['nickname'] != null)
         window.location.href= 'chat.html';
     else if(callback)
         callback();

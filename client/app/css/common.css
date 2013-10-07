@@ -60,3 +60,8 @@ body {
 .green-btn:hover {
     background: #1fbba6;
 }
+
+.x-caret {
+    background: #000;
+    width:1px;
+}
