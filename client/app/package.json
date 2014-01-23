@@ -1,12 +1,12 @@
 {
-    "name": "ChatKit",
-    "main": "html/settings.html",
+    "name": "Repostim",
+    "main": "templates/login.html",
     "version" : "0.1",
     "window": {
-        "width" 	: 900,
-        "height"	: 700,
+        "width" 	: 700,
+        "height"	: 600,
         "toolbar"	: true,
-        "min_width": 500,
+        "min_width" : 500,
         "min_height": 700
     },
     "single-instance" : false
